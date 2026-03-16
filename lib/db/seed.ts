@@ -6,7 +6,7 @@ import * as schema from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL || "postgres://nexus:aliali123@uetzne9sq4m1aai7cv8wwlrf:5432/middlemind";
 
-async function seed() {
+export async function seed() {
   const pool = new Pool({ connectionString: DATABASE_URL });
   const db = drizzle(pool, { schema });
 
@@ -245,7 +245,10 @@ async function seed() {
   await pool.end();
 }
 
-seed().catch((err) => {
-  console.error("[seed] Error:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seed().catch((err) => {
+    console.error("[seed] Error:", err);
+    process.exit(1);
+  });
+}
+
