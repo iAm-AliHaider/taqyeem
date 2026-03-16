@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { use } from "react";
@@ -29,19 +29,77 @@ const fadeUp = {
   }),
 };
 
+const reviewHover = {
+  y: -2,
+  transition: { duration: 0.2 },
+};
+
 export default function BusinessPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [lang] = useState<"en" | "ar">("en");
   const business = getBusiness(id) || getBusiness("stc")!;
+  const [barValues, setBarValues] = useState<Record<string, number>>({});
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
 
-  const avgCategoryScore = (catName: string) => {
-    const cat = business.categories.find((c) => c.name === catName);
-    return cat ? cat.score : 0;
-  };
+  useEffect(() => {
+    const timers = business.categories.map((cat, i) => {
+      const timer = setTimeout(() => {
+        setBarValues((prev) => ({ ...prev, [cat.name]: cat.score }));
+      }, 50 * (i + 1));
+      return timer;
+    });
+    return () => timers.forEach(clearTimeout);
+  }, [business.categories]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowStickyHeader(window.scrollY > 200);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div className="min-h-screen bg-warm-gray">
       <Navbar lang={lang} />
+
+      {/* Sticky Header */}
+      {showStickyHeader && (
+        <motion.div
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -100, opacity: 0 }}
+          className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm"
+        >
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-14">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-saudi-green/10 to-saudi-green/5 border border-saudi-green/15 flex items-center justify-center font-bold text-sm text-saudi-green">
+                  {business.logo}
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-gray-900 text-sm">{business.name}</span>
+                    {business.verified && <BadgeCheck className="w-3.5 h-3.5 text-saudi-green" />}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-sm font-bold text-gray-900">{business.overallScore.toFixed(1)}</div>
+                  <StarRating value={Math.round(business.overallScore)} readonly size="sm" />
+                </div>
+                <Link
+                  href={`/review/${business.id}`}
+                  className="bg-saudi-green text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-saudi-green-dark transition-colors"
+                >
+                  Review
+                </Link>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       <div className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
@@ -143,8 +201,8 @@ export default function BusinessPage({ params }: { params: Promise<{ id: string 
                   <div className="flex-1 bg-warm-gray-2 rounded-full h-2 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(cat.score / 5) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.4 + i * 0.08, ease: "easeOut" }}
+                      animate={{ width: `${(barValues[cat.name] || 0) / 5 * 100}%` }}
+                      transition={{ duration: 0.6, delay: 0.1 + i * 0.05, ease: "easeOut" }}
                       className={`h-full rounded-full ${
                         cat.score >= 4.5
                           ? "bg-saudi-green"
@@ -184,6 +242,7 @@ export default function BusinessPage({ params }: { params: Promise<{ id: string 
                   key={review.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
+                  whileHover={reviewHover}
                   transition={{ delay: 0.5 + i * 0.1 }}
                   className="border-b border-gray-50 last:border-0 pb-5 last:pb-0"
                 >

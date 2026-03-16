@@ -16,11 +16,14 @@ interface BusinessCardProps {
 export default function BusinessCard({ business, rank, compact }: BusinessCardProps) {
   return (
     <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      whileHover={{ y: -4, transition: { type: "spring", stiffness: 400 } }}
+      className="group relative"
     >
       <Link href={`/business/${business.id}`}>
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-card hover:shadow-card-hover transition-all duration-300 group cursor-pointer">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-card hover:shadow-card-hover transition-all duration-300 cursor-pointer group-hover:border-l-4 group-hover:border-l-saudi-green relative">
+          {/* Left accent bar on hover */}
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-saudi-green rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+          
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -52,8 +55,10 @@ export default function BusinessCard({ business, rank, compact }: BusinessCardPr
 
           {/* Score */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="text-3xl font-bold text-gray-900">
-              {business.overallScore.toFixed(1)}
+            <div className="rounded-full border-2 border-warm-gold/30 bg-warm-gold/5 w-10 h-10 flex items-center justify-center">
+              <span className="text-sm font-bold text-gray-900">
+                {business.overallScore.toFixed(1)}
+              </span>
             </div>
             <div>
               <StarRating value={Math.round(business.overallScore)} readonly size="sm" />

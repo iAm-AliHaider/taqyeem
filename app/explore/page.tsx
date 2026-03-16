@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, X, TrendingUp } from "lucide-react";
+import { Search, SlidersHorizontal, X, TrendingUp, SearchX } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import BusinessCard from "@/components/BusinessCard";
 import { businesses, sectors, cities } from "@/lib/mock-data";
@@ -16,12 +16,37 @@ const fadeUp = {
   }),
 };
 
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const cardFadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" as const },
+  },
+};
+
 export default function ExplorePage() {
   const [lang] = useState<"en" | "ar">("en");
   const [search, setSearch] = useState("");
   const [activeSector, setActiveSector] = useState("all");
   const [activeCity, setActiveCity] = useState("all");
   const [sort, setSort] = useState<"rating" | "reviews" | "name">("rating");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...businesses];
@@ -167,9 +192,9 @@ export default function ExplorePage() {
           {/* Results count */}
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-500">
-              Showing <span className="font-semibold text-gray-900">{filtered.length}</span> businesses
+              Showing <span className="font-semibold text-gray-900">{isLoading ? "..." : filtered.length}</span> businesses
             </p>
-            {(activeSector !== "all" || activeCity !== "all" || search) && (
+            {(activeSector !== "all" || activeCity !== "all" || search) && !isLoading && (
               <button
                 onClick={() => { setActiveSector("all"); setActiveCity("all"); setSearch(""); }}
                 className="text-xs text-saudi-green font-medium flex items-center gap-1 hover:underline"
@@ -181,25 +206,60 @@ export default function ExplorePage() {
           </div>
 
           {/* Grid */}
-          {filtered.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="text-5xl mb-4">🔍</div>
-              <p className="text-gray-500">No businesses found. Try adjusting your filters.</p>
-            </div>
+          {isLoading ? (
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
+              {[...Array(8)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  variants={cardFadeUp}
+                  custom={i}
+                >
+                  <div className="rounded-2xl shimmer-bg h-48 w-full" />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : filtered.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center py-20"
+            >
+              <div className="w-20 h-20 mx-auto mb-6 bg-warm-gray rounded-full flex items-center justify-center">
+                <SearchX className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No businesses found</h3>
+              <p className="text-gray-500 max-w-md mx-auto">
+                We couldn&apos;t find any businesses matching your search. Try adjusting your filters or search terms.
+              </p>
+              <button
+                onClick={() => { setActiveSector("all"); setActiveCity("all"); setSearch(""); }}
+                className="mt-6 bg-saudi-green text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-saudi-green-dark transition-colors"
+              >
+                Clear all filters
+              </button>
+            </motion.div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            >
               {filtered.map((biz, i) => (
                 <motion.div
                   key={biz.id}
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeUp}
-                  custom={i * 0.3}
+                  variants={cardFadeUp}
+                  custom={i}
                 >
                   <BusinessCard business={biz} />
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

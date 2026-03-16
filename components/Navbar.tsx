@@ -17,7 +17,7 @@ export default function Navbar({ lang = "en", onLangToggle }: NavbarProps) {
   const isAr = lang === "ar";
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
@@ -37,9 +37,9 @@ export default function Navbar({ lang = "en", onLangToggle }: NavbarProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
         scrolled
-          ? "bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm"
+          ? "bg-white/90 backdrop-blur-md shadow-sm"
           : "bg-transparent"
       )}
     >

@@ -11,11 +11,18 @@ import { getBusiness, categoryLabels } from "@/lib/mock-data";
 
 const STEP_NAMES = ["Verify Location", "Rate Experience", "Confirmation"];
 
+const stepTransition = {
+  initial: { x: 50, opacity: 0 },
+  animate: { x: 0, opacity: 1 },
+  exit: { x: -50, opacity: 0 },
+  transition: { duration: 0.25 },
+};
+
 const fadeIn = {
-  initial: { opacity: 0, x: 20 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 },
-  transition: { duration: 0.3 },
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -16 },
+  transition: { duration: 0.25 },
 };
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -80,7 +87,13 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                   {i < step ? <CheckCircle className="w-4 h-4" /> : i + 1}
                 </div>
                 <div className="flex-1 mx-2">
-                  <div className={`h-0.5 transition-all ${i < step ? "bg-saudi-green" : "bg-gray-200"}`} />
+                  <div className="h-0.5 bg-gray-200 overflow-hidden">
+                    <motion.div
+                      className="h-full bg-saudi-green"
+                      animate={{ width: step > i ? "100%" : "0%" }}
+                      transition={{ type: "spring", stiffness: 100 }}
+                    />
+                  </div>
                 </div>
                 {i === STEP_NAMES.length - 1 && (
                   <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${
@@ -98,7 +111,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             {step === 0 && (
               <motion.div
                 key="step0"
-                {...fadeIn}
+                initial={stepTransition.initial}
+                animate={stepTransition.animate}
+                exit={stepTransition.exit}
+                transition={stepTransition.transition}
                 className="bg-white rounded-2xl border border-gray-100 shadow-card p-6"
               >
                 <div className="text-center">
@@ -107,19 +123,18 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
 
                   {/* Animation */}
                   <div className="relative w-40 h-40 mx-auto mb-8">
-                    {/* Pulsing rings */}
+                    {/* Pulsing rings - 3 concentric rings */}
                     {!geoVerified && (
                       <>
-                        <motion.div
-                          animate={{ scale: [1, 1.5, 1.8], opacity: [0.4, 0.15, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                          className="absolute inset-0 rounded-full bg-saudi-green/20"
-                        />
-                        <motion.div
-                          animate={{ scale: [1, 1.3, 1.6], opacity: [0.5, 0.2, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, delay: 0.3, ease: "easeOut" }}
-                          className="absolute inset-0 rounded-full bg-saudi-green/25"
-                        />
+                        {Array(3).fill(0).map((_, i) => (
+                          <motion.div
+                            key={i}
+                            className="absolute inset-0 rounded-full border-2 border-saudi-green/40"
+                            style={{ width: 80 + i * 60, height: 80 + i * 60, left: '50%', top: '50%', marginLeft: -((80 + i * 60) / 2), marginTop: -((80 + i * 60) / 2) }}
+                            animate={{ scale: [1, 1.4], opacity: [0.6, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, delay: i * 0.6, ease: "easeOut" }}
+                          />
+                        ))}
                       </>
                     )}
 
@@ -200,7 +215,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             {step === 1 && (
               <motion.div
                 key="step1"
-                {...fadeIn}
+                initial={stepTransition.initial}
+                animate={stepTransition.animate}
+                exit={stepTransition.exit}
+                transition={stepTransition.transition}
                 className="space-y-4"
               >
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-6">
@@ -272,8 +290,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={stepTransition.initial}
+                animate={stepTransition.animate}
+                exit={stepTransition.exit}
+                transition={stepTransition.transition}
                 className="bg-white rounded-2xl border border-gray-100 shadow-card p-8 text-center"
               >
                 <motion.div
