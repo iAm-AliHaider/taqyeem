@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -154,6 +154,38 @@ const pricingPlans = [
   },
 ];
 
+function useCountUp(target: number, duration = 1400) {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef<number>(0);
+  useEffect(() => {
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.floor(eased * target));
+      if (p < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [target, duration]);
+  return value;
+}
+
+function StatCard({ value, label, icon }: { value: string; label: string; icon: string }) {
+  const numStr = value.replace(/,/g, "").match(/\d+/)?.[0] ?? "0";
+  const suffix = value.replace(/[\d,]/g, "");
+  const count = useCountUp(parseInt(numStr));
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-card text-center">
+      <div className="text-2xl mb-1">{icon}</div>
+      <div className="text-2xl font-bold text-gray-900">
+        {count.toLocaleString()}{suffix}
+      </div>
+      <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   const [lang, setLang] = useState<"en" | "ar">("en");
   const isAr = lang === "ar";
@@ -238,16 +270,12 @@ export default function HomePage() {
               className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto"
             >
               {stats.map((stat) => (
-                <div
+                <StatCard
                   key={stat.label}
-                  className="bg-white rounded-2xl border border-gray-100 p-4 shadow-card text-center"
-                >
-                  <div className="text-2xl mb-1">{stat.icon}</div>
-                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">
-                    {isAr ? stat.labelAr : stat.label}
-                  </div>
-                </div>
+                  value={stat.value}
+                  label={isAr ? stat.labelAr : stat.label}
+                  icon={stat.icon}
+                />
               ))}
             </motion.div>
           </motion.div>
@@ -329,7 +357,8 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={fadeUp}
                 custom={i * 0.5}
-                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-card hover:shadow-card-hover transition-all"
+                whileHover={{ y: -5, transition: { type: "spring" as const, stiffness: 400, damping: 20 } }}
+                className="bg-white rounded-2xl p-5 border border-gray-100 shadow-card hover:shadow-card-hover transition-shadow cursor-default"
               >
                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-3 ${feature.color}`}>
                   {feature.icon}

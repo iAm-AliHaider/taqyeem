@@ -92,6 +92,8 @@ export default function TierBadge({
         config.text,
         config.ring,
         animated && tier !== "redflag" && config.glow,
+        tier === "platinum" && animated && "platinum-shimmer",
+        tier === "gold" && animated && "gold-glow-pulse",
         sizeConfig[size],
         className
       )}

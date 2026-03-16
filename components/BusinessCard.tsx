@@ -16,11 +16,12 @@ interface BusinessCardProps {
 export default function BusinessCard({ business, rank, compact }: BusinessCardProps) {
   return (
     <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      whileHover={{ y: -6, boxShadow: "0 16px 48px rgba(27,107,58,0.10)" }}
+      transition={{ type: "spring", stiffness: 360, damping: 22 }}
     >
       <Link href={`/business/${business.id}`}>
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-card hover:shadow-card-hover transition-all duration-300 group cursor-pointer">
+        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-card hover:border-saudi-green/20 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-saudi-green scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top rounded-l-2xl" />
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">

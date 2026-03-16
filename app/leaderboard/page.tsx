@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, TrendingUp, TrendingDown, Minus, BadgeCheck, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import TierBadge from "@/components/TierBadge";
@@ -16,6 +16,25 @@ const fadeUp = {
     y: 0,
     transition: { duration: 0.35, delay: i * 0.04 },
   }),
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const rowVariant = {
+  hidden: { opacity: 0, x: -10 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.3 },
+  },
 };
 
 const podiumColors = ["bg-warm-gold", "bg-gray-300", "bg-amber-600"];
@@ -173,16 +192,21 @@ export default function LeaderboardPage() {
               <span className="text-xs text-gray-400">{leaderboard.length} businesses</span>
             </div>
 
-            <div className="divide-y divide-gray-50">
-              {leaderboard.map((biz, i) => (
-                <motion.div
-                  key={biz.id}
-                  initial="hidden"
-                  animate="visible"
-                  variants={fadeUp}
-                  custom={i * 0.3}
-                >
-                  <Link href={`/business/${biz.id}`}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSector}
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="divide-y divide-gray-50"
+              >
+                {leaderboard.map((biz, i) => (
+                  <motion.div
+                    key={biz.id}
+                    variants={rowVariant}
+                    custom={i}
+                  >
+                    <Link href={`/business/${biz.id}`}>
                     <div className="flex items-center gap-3 px-5 py-3.5 hover:bg-warm-gray transition-colors cursor-pointer group">
                       {/* Rank */}
                       <div className="w-8 text-center flex-shrink-0">
@@ -250,7 +274,8 @@ export default function LeaderboardPage() {
                   </Link>
                 </motion.div>
               ))}
-            </div>
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </div>
       </div>
