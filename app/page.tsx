@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -28,11 +28,6 @@ const fadeUp = {
     y: 0,
     transition: { duration: 0.5, delay: i * 0.1, ease: "easeOut" as const },
   }),
-};
-
-const featureHover = {
-  y: -6,
-  boxShadow: "0 12px 40px rgba(27,107,58,0.12)",
 };
 
 const stats = [
@@ -159,29 +154,6 @@ const pricingPlans = [
   },
 ];
 
-function AnimatedCounter({ target, suffix = "", duration = 1500 }: { target: number; suffix?: string; duration?: number }) {
-  const [count, setCount] = useState(0);
-  const countRef = useRef<number>(0);
-  const startTimeRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const animate = (currentTime: number) => {
-      if (!startTimeRef.current) startTimeRef.current = currentTime;
-      const elapsed = currentTime - startTimeRef.current;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      countRef.current = Math.floor(easeOutQuart * target);
-      setCount(countRef.current);
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration]);
-
-  return <>{count.toLocaleString()}{suffix}</>;
-}
-
 export default function HomePage() {
   const [lang, setLang] = useState<"en" | "ar">("en");
   const isAr = lang === "ar";
@@ -192,18 +164,8 @@ export default function HomePage() {
       <Navbar lang={lang} onLangToggle={() => setLang(isAr ? "en" : "ar")} />
 
       {/* Hero */}
-      <section className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-warm-gray overflow-hidden relative">
-        {/* Decorative gradient blobs */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-green-50 to-transparent rounded-full blur-3xl opacity-60" />
-          <div className="absolute bottom-0 left-0 w-72 h-72 bg-gradient-to-tr from-amber-50 to-transparent rounded-full blur-3xl opacity-60" />
-        </div>
-
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-20 -right-20 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-saudi-green/5 to-warm-gold/5 blur-3xl" />
-        </div>
-
-        <div className="max-w-6xl mx-auto relative z-10">
+      <section className="pt-24 pb-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white to-warm-gray overflow-hidden">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -253,18 +215,13 @@ export default function HomePage() {
               custom={3}
               className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-16"
             >
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
+              <Link
+                href="/explore"
+                className="w-full sm:w-auto bg-saudi-green text-white font-semibold px-6 py-3 rounded-xl hover:bg-saudi-green-dark transition-all inline-flex items-center justify-center gap-2 shadow-green-glow"
               >
-                <Link
-                  href="/explore"
-                  className="w-full sm:w-auto bg-saudi-green text-white font-semibold px-6 py-3 rounded-xl hover:bg-saudi-green-dark transition-all inline-flex items-center justify-center gap-2 shadow-green-glow"
-                >
-                  {isAr ? "استعرض الأعمال" : "Explore Businesses"}
-                  <ArrowRight className={`w-4 h-4 ${isAr ? "rotate-180" : ""}`} />
-                </Link>
-              </motion.div>
+                {isAr ? "استعرض الأعمال" : "Explore Businesses"}
+                <ArrowRight className={`w-4 h-4 ${isAr ? "rotate-180" : ""}`} />
+              </Link>
               <Link
                 href="/leaderboard"
                 className="w-full sm:w-auto bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl hover:bg-warm-gray transition-all border border-gray-200 inline-flex items-center justify-center gap-2"
@@ -280,24 +237,18 @@ export default function HomePage() {
               custom={4}
               className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto"
             >
-              {stats.map((stat) => {
-                const numericPart = stat.value.replace(/[^0-9]/g, "");
-                const suffix = stat.value.replace(/[0-9]/g, "");
-                return (
-                  <div
-                    key={stat.label}
-                    className="bg-white rounded-2xl border border-gray-100 p-4 shadow-card text-center"
-                  >
-                    <div className="text-2xl mb-1">{stat.icon}</div>
-                    <div className="text-2xl font-bold text-gray-900">
-                      <AnimatedCounter target={parseInt(numericPart)} suffix={suffix} />
-                    </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {isAr ? stat.labelAr : stat.label}
-                    </div>
+              {stats.map((stat) => (
+                <div
+                  key={stat.label}
+                  className="bg-white rounded-2xl border border-gray-100 p-4 shadow-card text-center"
+                >
+                  <div className="text-2xl mb-1">{stat.icon}</div>
+                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {isAr ? stat.labelAr : stat.label}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </div>
@@ -378,8 +329,6 @@ export default function HomePage() {
                 viewport={{ once: true }}
                 variants={fadeUp}
                 custom={i * 0.5}
-                whileHover={{ y: -6 }}
-                transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 className="bg-white rounded-2xl p-5 border border-gray-100 shadow-card hover:shadow-card-hover transition-all"
               >
                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center mb-3 ${feature.color}`}>

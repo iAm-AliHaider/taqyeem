@@ -82,8 +82,6 @@ export default function TierBadge({
   className,
 }: TierBadgeProps) {
   const config = tierConfig[tier];
-  const isPlatinum = tier === "platinum";
-  const isGold = tier === "gold";
 
   const badge = (
     <span
@@ -95,14 +93,9 @@ export default function TierBadge({
         config.ring,
         animated && tier !== "redflag" && config.glow,
         sizeConfig[size],
-        className,
-        isPlatinum && "relative overflow-hidden shimmer-bg",
-        isGold && "gold-pulse"
+        className
       )}
     >
-      {isPlatinum && (
-        <span className="absolute inset-0 shimmer-sweep" />
-      )}
       <span className={size === "sm" ? "text-xs" : "text-sm"}>{config.icon}</span>
       <span>{config.label}</span>
     </span>
