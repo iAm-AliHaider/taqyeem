@@ -1,30 +1,80 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #111827;
-  --font-sans: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
+@theme {
+  /* Brand colors */
+  --color-saudi-green:       #1B6B3A;
+  --color-saudi-green-dark:  #145429;
+  --color-saudi-green-light: #22873f;
+  --color-warm-gold:         #C8962E;
+  --color-warm-gold-light:   #E5B84A;
+  --color-warm-gray:         #F8F6F2;
+  --color-warm-gray-2:       #F0EDE8;
+  --color-warm-gray-3:       #E5E1DA;
+  --color-platinum:          #E8F0FF;
+  --color-gold:              #FFF8E1;
+  --color-silver:            #F5F5F5;
+  --color-bronze:            #FFF3E0;
+  --color-redflag:           #FFF5F5;
+
+  /* Fonts */
+  --font-sans:    'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
+  --font-arabic:  'Noto Sans Arabic', sans-serif;
+
+  /* Custom shadows */
+  --shadow-card:        0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-card-hover:  0 4px 12px rgba(0,0,0,0.08), 0 16px 48px rgba(0,0,0,0.06);
+  --shadow-green-glow:  0 0 30px rgba(27,107,58,0.15);
+
+  /* Keyframes */
+  --animate-pulse-slow:  pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float:       float 6s ease-in-out infinite;
+  --animate-shimmer:     shimmer 2s linear infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-10px); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+  }
+  @keyframes platinum-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(139,157,195,0.3); }
+    50%       { box-shadow: 0 0 25px rgba(139,157,195,0.6); }
+  }
+  @keyframes gold-glow {
+    0%, 100% { box-shadow: 0 0 10px rgba(200,150,46,0.3); }
+    50%       { box-shadow: 0 0 25px rgba(200,150,46,0.55); }
+  }
+  @keyframes skeleton-shine {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  @keyframes float-up-down {
+    0%, 100% { transform: translateY(0px); }
+    50%       { transform: translateY(-8px); }
+  }
+  @keyframes gold-pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0   rgba(200,150,46,0.00); }
+    50%       { box-shadow: 0 0 0 6px rgba(200,150,46,0.18); }
+  }
+  @keyframes platinum-sweep {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX( 120%); }
+  }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+/* ─── Base reset ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+  background: #ffffff;
+  color: #111827;
+  font-family: 'Plus Jakarta Sans', 'Noto Sans Arabic', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -33,49 +83,13 @@ body {
   font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #F8F6F2;
-}
-::-webkit-scrollbar-thumb {
-  background: #D1D5DB;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #1B6B3A;
-}
+/* ─── Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #F8F6F2; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1B6B3A; }
 
-/* Shimmer animation */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.shimmer {
-  background: linear-gradient(90deg, #F8F6F2 25%, #FFFFFF 50%, #F8F6F2 75%);
-  background-size: 200% 100%;
-  animation: shimmer 2s linear infinite;
-}
-
-/* Tier badge glow animations */
-@keyframes platinum-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(139,157,195,0.3); }
-  50% { box-shadow: 0 0 25px rgba(139,157,195,0.6); }
-}
-
-@keyframes gold-glow {
-  0%, 100% { box-shadow: 0 0 10px rgba(200,150,46,0.3); }
-  50% { box-shadow: 0 0 25px rgba(200,150,46,0.55); }
-}
-
-.tier-platinum-glow { animation: platinum-glow 3s ease-in-out infinite; }
-.tier-gold-glow { animation: gold-glow 3s ease-in-out infinite; }
-
-/* Gradient text */
+/* ─── Utility classes ────────────────────────────────── */
 .gradient-text-green {
   background: linear-gradient(135deg, #1B6B3A 0%, #22873f 100%);
   -webkit-background-clip: text;
@@ -90,19 +104,13 @@ body {
   background-clip: text;
 }
 
-/* Glass card */
 .glass-card {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255,255,255,0.85);
+  border: 1px solid rgba(255,255,255,0.6);
 }
 
-/* Skeleton shimmer */
-@keyframes skeleton-shine {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
 .skeleton {
   background: linear-gradient(90deg, #f0efed 25%, #e8e6e3 50%, #f0efed 75%);
   background-size: 400px 100%;
@@ -110,29 +118,13 @@ body {
   border-radius: 0.75rem;
 }
 
-/* Floating animation */
-@keyframes float-up-down {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
-}
-.float-anim { animation: float-up-down 3.5s ease-in-out infinite; }
-
-/* Pulse gold glow */
-@keyframes gold-pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(200,150,46,0.0); }
-  50%       { box-shadow: 0 0 0 6px rgba(200,150,46,0.18); }
-}
+.float-anim    { animation: float-up-down  3.5s ease-in-out infinite; }
 .gold-glow-pulse { animation: gold-pulse-glow 2.2s ease-in-out infinite; }
 
-/* Platinum shimmer sweep */
-@keyframes platinum-sweep {
-  0%   { transform: translateX(-120%); }
-  100% { transform: translateX(120%); }
-}
-.platinum-shimmer {
-  position: relative;
-  overflow: hidden;
-}
+.tier-platinum-glow { animation: platinum-glow 3s ease-in-out infinite; }
+.tier-gold-glow     { animation: gold-glow     3s ease-in-out infinite; }
+
+.platinum-shimmer { position: relative; overflow: hidden; }
 .platinum-shimmer::after {
   content: "";
   position: absolute;
