@@ -19,7 +19,7 @@ import {
 import Navbar from "@/components/Navbar";
 import TierBadge from "@/components/TierBadge";
 import BusinessCard from "@/components/BusinessCard";
-import { getTopBusinesses } from "@/lib/mock-data";
+import { getTopBusinesses, type Business as MockBusiness } from "@/lib/mock-data";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -30,10 +30,10 @@ const fadeUp = {
   }),
 };
 
-const stats = [
-  { value: "12,400+", label: "Reviews", labelAr: "تقييم", icon: "⭐" },
-  { value: "3,200+", label: "Businesses", labelAr: "نشاط تجاري", icon: "🏢" },
-  { value: "94%", label: "Verified", labelAr: "موثق", icon: "✅" },
+const DEFAULT_STATS = [
+  { value: "0", label: "Reviews", labelAr: "تقييم", icon: "⭐" },
+  { value: "0", label: "Businesses", labelAr: "نشاط تجاري", icon: "🏢" },
+  { value: "0", label: "Verified", labelAr: "موثق", icon: "✅" },
   { value: "15", label: "Cities", labelAr: "مدينة", icon: "🏙️" },
 ];
 
@@ -186,10 +186,76 @@ function StatCard({ value, label, icon }: { value: string; label: string; icon: 
   );
 }
 
+interface ApiStats {
+  businesses: number;
+  reviews: number;
+  users: number;
+  verified: number;
+}
+
+interface ApiBusinessItem {
+  id: string;
+  slug: string;
+  name: string;
+  nameAr?: string | null;
+  overallScore: string;
+  reviewCount: number;
+  tier: string;
+  verified: boolean;
+}
+
 export default function HomePage() {
   const [lang, setLang] = useState<"en" | "ar">("en");
   const isAr = lang === "ar";
-  const topBusinesses = getTopBusinesses(5);
+
+  const [stats, setStats] = useState(DEFAULT_STATS);
+  const [topBusinesses, setTopBusinesses] = useState<MockBusiness[]>(getTopBusinesses(5));
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json() as Promise<ApiStats>)
+      .then((data) => {
+        if (data.businesses || data.reviews) {
+          setStats([
+            { value: `${data.reviews}`, label: "Reviews", labelAr: "تقييم", icon: "⭐" },
+            { value: `${data.businesses}`, label: "Businesses", labelAr: "نشاط تجاري", icon: "🏢" },
+            { value: `${data.verified}`, label: "Verified", labelAr: "موثق", icon: "✅" },
+            { value: "15", label: "Cities", labelAr: "مدينة", icon: "🏙️" },
+          ]);
+        }
+      })
+      .catch(() => {/* keep defaults */});
+
+    fetch("/api/leaderboard")
+      .then((r) => r.json() as Promise<{ businesses: ApiBusinessItem[] }>)
+      .then((data) => {
+        const bizes = data.businesses ?? [];
+        if (bizes.length > 0) {
+          const mapped: MockBusiness[] = bizes.slice(0, 5).map((b, i) => ({
+            id: b.slug || b.id,
+            name: b.name,
+            nameAr: b.nameAr || b.name,
+            sector: "general",
+            sectorAr: "عام",
+            city: "riyadh",
+            cityAr: "الرياض",
+            tier: (["platinum","gold","silver","bronze","redflag"].includes(b.tier) ? b.tier : "silver") as MockBusiness["tier"],
+            overallScore: parseFloat(b.overallScore) || 0,
+            reviewCount: b.reviewCount,
+            rank: i + 1,
+            rankChange: 0,
+            logo: b.name.charAt(0).toUpperCase(),
+            description: "",
+            descriptionAr: "",
+            verified: b.verified,
+            categories: [],
+            reviews: [],
+          }));
+          setTopBusinesses(mapped);
+        }
+      })
+      .catch(() => {/* keep mock data */});
+  }, []);
 
   return (
     <div dir={isAr ? "rtl" : "ltr"} className="min-h-screen bg-white">

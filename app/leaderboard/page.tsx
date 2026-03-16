@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, TrendingUp, TrendingDown, Minus, BadgeCheck, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import TierBadge from "@/components/TierBadge";
 import StarRating from "@/components/StarRating";
-import { getLeaderboard, sectors } from "@/lib/mock-data";
+import { getLeaderboard, sectors, type Business as MockBusiness } from "@/lib/mock-data";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 12 },
@@ -42,11 +42,64 @@ const podiumTextColors = ["text-amber-800", "text-gray-700", "text-amber-900"];
 const podiumIcons = ["🥇", "🥈", "🥉"];
 const podiumHeights = ["h-28", "h-20", "h-16"];
 
+interface ApiBusinessItem {
+  id: string;
+  slug: string;
+  name: string;
+  nameAr?: string | null;
+  sector?: string | null;
+  city?: string | null;
+  overallScore: string;
+  reviewCount: number;
+  tier: string;
+  verified: boolean;
+}
+
+function mapToMock(b: ApiBusinessItem, i: number): MockBusiness {
+  return {
+    id: b.slug || b.id,
+    name: b.name,
+    nameAr: b.nameAr || b.name,
+    sector: b.sector || "other",
+    sectorAr: b.sector || "أخرى",
+    city: b.city || "riyadh",
+    cityAr: b.city || "الرياض",
+    tier: (["platinum","gold","silver","bronze","redflag"].includes(b.tier) ? b.tier : "silver") as MockBusiness["tier"],
+    overallScore: parseFloat(b.overallScore) || 0,
+    reviewCount: b.reviewCount,
+    rank: i + 1,
+    rankChange: 0,
+    logo: b.name.charAt(0).toUpperCase(),
+    description: "",
+    descriptionAr: "",
+    verified: b.verified,
+    categories: [],
+    reviews: [],
+  };
+}
+
 export default function LeaderboardPage() {
   const [lang] = useState<"en" | "ar">("en");
   const [activeSector, setActiveSector] = useState("all");
+  const [allBusinesses, setAllBusinesses] = useState<MockBusiness[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
-  const leaderboard = getLeaderboard(activeSector);
+  useEffect(() => {
+    fetch("/api/leaderboard")
+      .then((r) => r.json() as Promise<{ businesses: ApiBusinessItem[] }>)
+      .then((data) => {
+        if ((data.businesses ?? []).length > 0) {
+          setAllBusinesses((data.businesses).map(mapToMock));
+          setLoaded(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const baseLeaderboard = loaded ? allBusinesses : getLeaderboard("all");
+  const leaderboard = activeSector === "all"
+    ? baseLeaderboard
+    : baseLeaderboard.filter((b) => b.sector === activeSector);
   const top3 = leaderboard.slice(0, 3);
   const rest = leaderboard.slice(3);
 
